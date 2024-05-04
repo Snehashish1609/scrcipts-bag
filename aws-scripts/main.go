@@ -11,17 +11,23 @@ import (
 	"github.com/joho/godotenv"
 )
 
+var (
+	accessKey string
+	secretKey string
+	region    string
+)
+
 func main() {
 	// Load environment variables from .env file
-	if err := godotenv.Load(); err != nil {
+	if err := godotenv.Load("../.env"); err != nil {
 		fmt.Println("Error loading .env file:", err)
 		os.Exit(1)
 	}
 
 	// Retrieve AWS credentials and region from environment variables
-	accessKey := os.Getenv("AWS_ACCESS_KEY_ID")
-	secretKey := os.Getenv("AWS_SECRET_ACCESS_KEY")
-	region := os.Getenv("AWS_REGION")
+	accessKey = os.Getenv("AWS_ACCESS_KEY_ID")
+	secretKey = os.Getenv("AWS_SECRET_ACCESS_KEY")
+	region = os.Getenv("AWS_REGION")
 
 	// Initialize AWS configuration with provided credentials and region
 	cfg, err := config.LoadDefaultConfig(context.Background(), config.WithCredentialsProvider(
@@ -35,6 +41,12 @@ func main() {
 	// Create EC2 client
 	client := ec2.NewFromConfig(cfg)
 
+	// list Ec2 instances
+	list_instances(client)
+
+}
+
+func list_instances(client *ec2.Client) {
 	// Retrieve EC2 instances
 	result, err := client.DescribeInstances(context.Background(), &ec2.DescribeInstancesInput{})
 	if err != nil {
